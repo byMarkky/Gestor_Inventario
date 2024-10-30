@@ -1,4 +1,4 @@
 package org.marco.dao.impl;
 
-public class ProductDao {
+public class SalesDaoJdbc {
 }
