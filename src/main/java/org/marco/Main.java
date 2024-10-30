@@ -1,7 +1,15 @@
 package org.marco;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.*;
+
 public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello world!");
+
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+
+    public static void main(String[] args) throws SQLException {
+
     }
 }
