@@ -28,9 +28,18 @@ public class Main {
                 LocalDateTime.now()
         );
 
-        Product res = ProductService.newProduct(product);
+        ProductService.newProduct(product);
+        Product productReceived = ProductService.getById(product.getId());
+        logger.info("PRODUCT RECEIVED: {}", productReceived);
+        try {
+            Thread.sleep(10_000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
-        logger.info("CREATED PRODUCT: {}", res);
+        if (ProductService.deleteProduct(product)) {
+            logger.info("PRODUCT DELETED SUCCESSFULLY");
+        }
 
     }
 }
