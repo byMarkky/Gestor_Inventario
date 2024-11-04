@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProductService {
@@ -32,7 +33,20 @@ public class ProductService {
     }
 
     public static Product updateProduct(Product newInfo) {
-        return null;
+
+        Product res = null;
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
+
+            productDAO = new ProductDaoJdbc(conn);
+
+            if (productDAO.update(newInfo)) res = newInfo;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return res;
     }
 
     public static boolean deleteProduct(Product prod) {
@@ -74,10 +88,29 @@ public class ProductService {
     }
 
     public static List<Product> getAllProduct() {
-        return null;
+
+        List<Product> result = new ArrayList<>();
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
+            productDAO = new ProductDaoJdbc(conn);
+            result = productDAO.getAll();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
     }
 
     public static List<Product> getProductsByNameALike(Product name) {
-        return null;
+        List<Product> result = new ArrayList<>();
+
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
+            productDAO = new ProductDaoJdbc(conn);
+            result = productDAO.getAllByNameAlike(name.getName());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
     }
 }

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class Main {
 
@@ -27,18 +28,50 @@ public class Main {
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
+        Product product2 = new Product(
+                2,
+                "Acer Swift",
+                "Acer Swift 14 16GB RAM, 1TB SSD",
+                14,
+                799,
+                true,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+
+        Product toUpdate = new Product(
+                1,
+                "IPhone",
+                "Iphone 16 Red",
+                40,
+                1400,
+                true,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+
+        ProductService.deleteProduct(product);
+        ProductService.deleteProduct(product2);
 
         ProductService.newProduct(product);
-        Product productReceived = ProductService.getById(product.getId());
-        logger.info("PRODUCT RECEIVED: {}", productReceived);
+        ProductService.newProduct(product2);
         try {
             Thread.sleep(10_000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-        if (ProductService.deleteProduct(product)) {
-            logger.info("PRODUCT DELETED SUCCESSFULLY");
+        Product updated = ProductService.updateProduct(toUpdate);
+        if (updated != null) {
+            logger.info("UPDATED PRODUCT: {}", updated);
+        }
+
+        List<Product> products = ProductService.getProductsByNameALike(product2);
+
+        if (!products.isEmpty()) {
+            for (Product p : products) {
+                logger.info("{}", p);
+            }
         }
 
     }

@@ -12,5 +12,5 @@ public interface IProductDao {
     Product getById(int productId);
     List<Product> getAll();
     List<Product> getAllByNameAlike(String name);
-    boolean substractStock(int idToSubstract);
+    boolean substractStock(int idToSubstract, int amount);
 }

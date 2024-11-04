@@ -1,17 +1,14 @@
 package org.marco.dao.impl;
 
-import org.marco.dao.ConnectionManager;
 import org.marco.dao.IProductDao;
 import org.marco.exceptions.CannotDeleteException;
 import org.marco.model.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProductDaoJdbc implements IProductDao {
@@ -53,7 +50,28 @@ public class ProductDaoJdbc implements IProductDao {
 
     @Override
     public boolean update(Product toModify) {
-        return false;
+
+        String query = "UPDATE PRODUCT SET ID=?,NAME=?,DESCRIPTION=?,STOCK=?,PRICE=?,AVAILABLE=?,UPDATE_DATE=? WHERE ID=?";
+        boolean res = false;
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, toModify.getId());
+            statement.setString(2, toModify.getName());
+            statement.setString(3, toModify.getDescription());
+            statement.setInt(4, toModify.getStock());
+            statement.setDouble(5, toModify.getPrice());
+            statement.setBoolean(6, toModify.isAvailable());
+            statement.setObject(7, LocalDateTime.now());
+
+            statement.setInt(8, toModify.getId());  // WHERE ID = product.ID
+
+            if (statement.executeUpdate() == 1) res = true;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return res;
     }
 
     @Override
@@ -120,16 +138,76 @@ public class ProductDaoJdbc implements IProductDao {
 
     @Override
     public List<Product> getAll() {
-        return List.of();
+        String query = "SELECT * FROM PRODUCT";
+        List<Product> result = new ArrayList<>();
+        try (Statement statement = connection.createStatement()) {
+
+            ResultSet res = statement.executeQuery(query);
+
+            while (res.next()) {
+                result.add(new Product(
+                        res.getInt("ID"),
+                        res.getString("NAME"),
+                        res.getString("DESCRIPTION"),
+                        res.getInt("STOCK"),
+                        res.getDouble("PRICE"),
+                        res.getBoolean("AVAILABLE"),
+                        (LocalDateTime) res.getObject("CREATE_DATE"),
+                        (LocalDateTime) res.getObject("UPDATE_DATE")
+                ));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
     }
 
     @Override
     public List<Product> getAllByNameAlike(String name) {
-        return List.of();
+        String query = "SELECT * FROM PRODUCT WHERE NAME=?";
+        List<Product> result = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setString(1, name);
+
+            ResultSet res = statement.executeQuery();
+
+            while (res.next()) {
+                result.add(new Product(
+                        res.getInt("ID"),
+                        res.getString("NAME"),
+                        res.getString("DESCRIPTION"),
+                        res.getInt("STOCK"),
+                        res.getDouble("PRICE"),
+                        res.getBoolean("AVAILABLE"),
+                        (LocalDateTime) res.getObject("CREATE_DATE"),
+                        (LocalDateTime) res.getObject("UPDATE_DATE")
+                ));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
     }
 
     @Override
-    public boolean substractStock(int idToSubstract) {
+    public boolean substractStock(int idToSubstract, int amount) {
+        String query = "UPDATE PRODUCT SET STOCK=? WHERE ID=?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, amount);
+            statement.setInt(2, idToSubstract);
+
+            if (statement.executeUpdate() != 0) return true;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
         return false;
     }
 }
