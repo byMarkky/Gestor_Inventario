@@ -1,78 +1,52 @@
 package org.marco;
 
 import org.marco.dao.ConnectionManager;
-import org.marco.model.Product;
-import org.marco.service.ProductService;
+import org.marco.model.Client;
+import org.marco.service.ClientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class Main {
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) {
 
-        Connection connection = ConnectionManager.getInstance().getConnection();
-
-        Product product = new Product(
-                1,
-                "IPhone",
-                "Iphone 5 Red",
-                30,
-                1200,
-                true,
-                LocalDateTime.now(),
-                LocalDateTime.now()
-        );
-        Product product2 = new Product(
+        Client client = new Client(
                 2,
-                "Acer Swift",
-                "Acer Swift 14 16GB RAM, 1TB SSD",
-                14,
-                799,
-                true,
+                "Maria",
+                "Reillo",
+                "maria.reillo@email.com",
+                3,
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
 
-        Product toUpdate = new Product(
-                1,
-                "IPhone",
-                "Iphone 16 Red",
-                40,
-                1400,
-                true,
-                LocalDateTime.now(),
-                LocalDateTime.now()
-        );
-
-        ProductService.deleteProduct(product);
-        ProductService.deleteProduct(product2);
-
-        ProductService.newProduct(product);
-        ProductService.newProduct(product2);
+        ClientService.newClient(client);
+        logger.info("CLIENT MARIA CREATED");
         try {
-            Thread.sleep(10_000);
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        client.setPurchases(14);
+        client.setEmail("marreillo@email.org");
+        ClientService.updateClient(client);
+        logger.info("CLIENT MARIA UPDATED");
+        try {
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-        Product updated = ProductService.updateProduct(toUpdate);
-        if (updated != null) {
-            logger.info("UPDATED PRODUCT: {}", updated);
-        }
+        ClientService.deleteClient(client);
+        logger.info("CLIENT MARIA DELETED");
 
-        List<Product> products = ProductService.getProductsByNameALike(product2);
-
-        if (!products.isEmpty()) {
-            for (Product p : products) {
-                logger.info("{}", p);
-            }
-        }
+        Client client1 = ClientService.getClientByEmail("marceo@email.com");
+        logger.info("CLIENT BY EMAIL: {}", client1);
 
     }
 }
