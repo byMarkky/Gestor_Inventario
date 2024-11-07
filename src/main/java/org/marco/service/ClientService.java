@@ -19,6 +19,11 @@ public class ClientService {
         }
     }
 
+    /**
+     * Method to create new client in the database
+     * @param client Client to be created
+     * @return The client created
+     */
     public static Client newClient(Client client) {
 
         if (clientDao.insert(client) != 0)
@@ -27,6 +32,11 @@ public class ClientService {
         return null;
     }
 
+    /**
+     * Method to update an existing client
+     * @param newInfo Update client info.
+     * @return The new client data
+     */
     public static Client updateClient(Client newInfo) {
         if (clientDao.update(newInfo))
             return newInfo;
@@ -34,14 +44,28 @@ public class ClientService {
         return null;
     }
 
+    /**
+     * Method to delete a client from the database
+     * @param client Client to be deleted
+     * @return True if the client has been successfully remove, else, false.
+     */
     public static boolean deleteClient(Client client) {
         return clientDao.delete(client.getId());
     }
 
+    /**
+     * Get all clients from the database
+     * @return List of clients
+     */
     public static List<Client> getAllClients() {
         return clientDao.getAll();
     }
 
+    /**
+     * Get a client by his email
+     * @param email Email of the client we want
+     * @return The client with the specified email
+     */
     public static Client getClientByEmail(String email) {
         return clientDao.getByEmail(email);
     }

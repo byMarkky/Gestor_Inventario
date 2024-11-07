@@ -1,10 +1,8 @@
 package org.marco.dao.impl;
 
-import org.marco.dao.ConnectionManager;
 import org.marco.dao.IClientDao;
 import org.marco.exceptions.CannotDeleteException;
 import org.marco.model.Client;
-import org.marco.model.Product;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -13,7 +11,7 @@ import java.util.List;
 
 public class ClientDaoJdbc implements IClientDao {
 
-    private Connection connection;
+    private final Connection connection;
 
     public ClientDaoJdbc(Connection conn) {
         this.connection = conn;
@@ -21,7 +19,7 @@ public class ClientDaoJdbc implements IClientDao {
 
     @Override
     public int insert(Client toCreate) {
-        int result = 0;
+        int result;
         try {
             PreparedStatement statement = connection.prepareStatement(
                     "INSERT INTO " +
@@ -88,8 +86,20 @@ public class ClientDaoJdbc implements IClientDao {
     }
 
     @Override
-    public int incrementPurchases(int amount) {
-        return 0;
+    public boolean incrementPurchases(int clientId, int amount) {
+        String query = "UPDATE CLIENT SET PURCHASES=? WHERE ID=?";
+        Client client = getById(clientId);
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, client.getPurchases() + amount);
+            statement.setInt(2, clientId);
+
+            return statement.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
