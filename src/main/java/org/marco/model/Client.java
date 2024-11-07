@@ -70,7 +70,7 @@ public class Client {
         this.createDate = createDate;
     }
 
-    public LocalDateTime getUdpateDate() {
+    public LocalDateTime getUpdateDate() {
         return udpateDate;
     }
 
