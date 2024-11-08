@@ -2,7 +2,10 @@ package org.marco;
 
 import org.marco.dao.ConnectionManager;
 import org.marco.model.Client;
+import org.marco.model.Product;
 import org.marco.service.ClientService;
+import org.marco.service.ProductService;
+import org.marco.service.SalesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,38 +18,32 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Client client = new Client(
-                2,
-                "Maria",
-                "Reillo",
-                "maria.reillo@email.com",
-                3,
+        Product product = new Product(
+                1,
+                "MacBook Air 13",
+                "MacBook Air 13\" 8GB RAM, 520GB",
+                14,
+                1500,
+                true,
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
 
+        Client client = new Client(
+                1,
+                "Maria",
+                "Reillo",
+                "maria@email.com",
+                1,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+
+        ProductService.newProduct(product);
         ClientService.newClient(client);
-        logger.info("CLIENT MARIA CREATED");
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        client.setPurchases(14);
-        client.setEmail("marreillo@email.org");
-        ClientService.updateClient(client);
-        logger.info("CLIENT MARIA UPDATED");
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
 
-        ClientService.deleteClient(client);
-        logger.info("CLIENT MARIA DELETED");
-
-        Client client1 = ClientService.getClientByEmail("marceo@email.com");
-        logger.info("CLIENT BY EMAIL: {}", client1);
+        SalesService salesService = new SalesService();
+        salesService.newSale(product, client, 1);
 
     }
 }
