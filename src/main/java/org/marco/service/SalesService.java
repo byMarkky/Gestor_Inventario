@@ -16,11 +16,11 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 public class SalesService {
-    private final IProductDao productDao;
-    private final IClientDao clientDao;
-    private final ISalesDao salesDao;
+    private static final IProductDao productDao;
+    private static final IClientDao clientDao;
+    private static final ISalesDao salesDao;
 
-    {
+    static {
         try {
             Connection conn = ConnectionManager.getInstance().getConnection();
             productDao = new ProductDaoJdbc(conn);
@@ -31,16 +31,16 @@ public class SalesService {
         }
     }
 
-    public void newSale(Product product, Client client, int quantity) {
+    public static void newSale(Product product, Client client, int quantity) {
         Sales sales = new Sales(1, client, product, quantity, LocalDateTime.now());
         salesDao.insert(sales);
     }
 
-    public Product getMostPurchasedProduct() {
+    public static Product getMostPurchasedProduct() {
         return null;
     }
 
-    Client getTopPurchasingClient() {
+    public static Client getTopPurchasingClient() {
         return null;
     }
 

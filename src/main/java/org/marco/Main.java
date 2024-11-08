@@ -1,6 +1,5 @@
 package org.marco;
 
-import org.marco.dao.ConnectionManager;
 import org.marco.model.Client;
 import org.marco.model.Product;
 import org.marco.service.ClientService;
@@ -9,7 +8,6 @@ import org.marco.service.SalesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
 import java.time.LocalDateTime;
 
 public class Main {
@@ -42,8 +40,7 @@ public class Main {
         ProductService.newProduct(product);
         ClientService.newClient(client);
 
-        SalesService salesService = new SalesService();
-        salesService.newSale(product, client, 1);
+        SalesService.newSale(product, client, 1);
 
     }
 }
