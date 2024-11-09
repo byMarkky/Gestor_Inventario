@@ -9,12 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class Main {
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
+
 
         Product product = new Product(
                 1,
@@ -27,20 +29,17 @@ public class Main {
                 LocalDateTime.now()
         );
 
-        Client client = new Client(
-                1,
-                "Maria",
-                "Reillo",
-                "maria@email.com",
-                1,
-                LocalDateTime.now(),
-                LocalDateTime.now()
-        );
+        ProductService.deleteProduct(product);
 
         ProductService.newProduct(product);
-        ClientService.newClient(client);
 
-        SalesService.newSale(product, client, 1);
+        product.setAvailable(false);
+
+        Thread.sleep(10_000);
+
+        ProductService.updateProduct(product);
+
+        List<Product> product1 = ProductService.getProductsByNameALike(product);
 
     }
 }

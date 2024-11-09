@@ -20,6 +20,34 @@ public class ProductDaoJdbc implements IProductDao {
         this.connection = connection;
     }
 
+    private boolean exists(int id) {
+        String query = "SELECT p.ID FROM PRODUCT p WHERE p.ID=?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, id);
+
+            ResultSet res = statement.executeQuery();
+
+            return res.next();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private boolean haveSales(int productId) {
+        String query = "SELECT s.SALES_ID FROM SALES s where s.PRODUCT_ID=?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, productId);
+
+            ResultSet res = statement.executeQuery();
+
+            return res.next();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public int insert(Product toCreate) {
         int result = 0;
@@ -39,6 +67,8 @@ public class ProductDaoJdbc implements IProductDao {
             statement.setObject(7, toCreate.getCreateDate());
             statement.setObject(8, toCreate.getUpdateDate());
 
+            logger.info("CLIENT {} SUCCESSFULLY CREATED", toCreate.getId());
+
             result = statement.executeUpdate();
 
         } catch (SQLException e) {
@@ -51,23 +81,29 @@ public class ProductDaoJdbc implements IProductDao {
     @Override
     public boolean update(Product toModify) {
 
-        String query = "UPDATE PRODUCT SET ID=?,NAME=?,DESCRIPTION=?,STOCK=?,PRICE=?,AVAILABLE=?,UPDATE_DATE=? WHERE ID=?";
+        // Case when the product we want to update don't exist
+        if (!exists(toModify.getId())) {
+            logger.info("PRODUCT {} DO NOT EXISTS", toModify.getId());
+            return false;
+        }
+
+        String query = "UPDATE PRODUCT SET NAME=?,DESCRIPTION=?,STOCK=?,PRICE=?,AVAILABLE=?,UPDATE_DATE=? WHERE ID=?";
         boolean res = false;
         try (PreparedStatement statement = connection.prepareStatement(query)) {
 
-            statement.setInt(1, toModify.getId());
-            statement.setString(2, toModify.getName());
-            statement.setString(3, toModify.getDescription());
-            statement.setInt(4, toModify.getStock());
-            statement.setDouble(5, toModify.getPrice());
-            statement.setBoolean(6, toModify.isAvailable());
-            statement.setObject(7, LocalDateTime.now());
+            statement.setString(1, toModify.getName());
+            statement.setString(2, toModify.getDescription());
+            statement.setInt(3, toModify.getStock());
+            statement.setDouble(4, toModify.getPrice());
+            statement.setBoolean(5, toModify.isAvailable());
+            statement.setObject(6, toModify.getUpdateDate());
 
-            statement.setInt(8, toModify.getId());  // WHERE ID = product.ID
+            statement.setInt(7, toModify.getId());  // WHERE ID = product.ID
 
-            if (statement.executeUpdate() == 1) res = true;
+            if (statement.executeUpdate() == 1) res = true; logger.info("CLIENT WITH ID: {} UPDATED CORRECTLY", toModify.getId());
 
         } catch (SQLException e) {
+            logger.error("ERROR TRYING TO UPDATE THE CLIENT {}, ERROR TRACE: {}", toModify.getId(), e.getMessage());
             throw new RuntimeException(e);
         }
 
@@ -76,7 +112,8 @@ public class ProductDaoJdbc implements IProductDao {
 
     @Override
     public boolean delete(int toDelete) {
-        //if (!haveSales(toDelete)) return false;
+
+        if (haveSales(toDelete)) throw new CannotDeleteException("THIS PRODUCT HAVE SALES: " + toDelete);
 
         String query = "DELETE FROM PRODUCT WHERE ID=?";
 
@@ -117,23 +154,6 @@ public class ProductDaoJdbc implements IProductDao {
             throw new RuntimeException(e);
         }
         return product;
-    }
-
-    private boolean haveSales(int productId) {
-        boolean haveSales = false;
-        String query = "SELECT * FROM SALES S WHERE PRODUCT_ID=?";
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setInt(1, productId);
-            ResultSet res = preparedStatement.executeQuery();
-
-            if (res.next()) return true;
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        return haveSales;
     }
 
     @Override

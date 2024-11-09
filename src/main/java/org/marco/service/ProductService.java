@@ -3,12 +3,14 @@ package org.marco.service;
 import org.marco.dao.ConnectionManager;
 import org.marco.dao.IProductDao;
 import org.marco.dao.impl.ProductDaoJdbc;
+import org.marco.exceptions.CannotDeleteException;
 import org.marco.model.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,10 +24,10 @@ public class ProductService {
 
             productDAO = new ProductDaoJdbc(conn);
             productDAO.insert(product);
-            logger.info("PRODUCT INSERTED, {}", product);
+            logger.info("PRODUCT CREATED, {}", product);
 
         } catch (SQLException e) {
-            logger.error("PRODUCT CAN NOT BE INSERTED, {}", e.getMessage());
+            logger.error("PRODUCT CAN NOT BE CREATED, {}", e.getMessage());
             throw new RuntimeException(e);
         }
 
@@ -40,9 +42,15 @@ public class ProductService {
 
             productDAO = new ProductDaoJdbc(conn);
 
-            if (productDAO.update(newInfo)) res = newInfo;
+            newInfo.setUpdateDate(LocalDateTime.now());
+
+            if (productDAO.update(newInfo)) {
+                res = newInfo;
+                logger.info("PRODUCT {} UPDATED", newInfo.getId());
+            } else logger.info("PRODUCT DO NOT {} UPDATED", newInfo.getId());
 
         } catch (SQLException e) {
+            logger.error("PRODUCT {} CAN NOT BE UPDATED", newInfo.getId());
             throw new RuntimeException(e);
         }
 
@@ -50,7 +58,8 @@ public class ProductService {
     }
 
     public static boolean deleteProduct(Product prod) {
-        boolean res = false;
+
+        boolean res;
         try (Connection conn = ConnectionManager.getInstance().getConnection()) {
 
             productDAO = new ProductDaoJdbc(conn);
