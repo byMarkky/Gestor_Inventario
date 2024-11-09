@@ -116,6 +116,7 @@ public class ProductService {
         try (Connection conn = ConnectionManager.getInstance().getConnection()) {
             productDAO = new ProductDaoJdbc(conn);
             result = productDAO.getAllByNameAlike(name.getName());
+            if (result == null) logger.info("DO NOT EXISTS A PRODUCT WITH A NAME LIKE {}", name);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

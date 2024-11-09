@@ -17,29 +17,24 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
 
-
-        Product product = new Product(
-                1,
-                "MacBook Air 13",
-                "MacBook Air 13\" 8GB RAM, 520GB",
-                14,
-                1500,
-                true,
+        Client client = new Client(
+                2,
+                "Samuel",
+                "Deluque",
+                "samuel@email.com",
+                20,
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
 
-        ProductService.deleteProduct(product);
+        ClientService.deleteClient(client);
 
-        ProductService.newProduct(product);
+        ClientService.newClient(client);
 
-        product.setAvailable(false);
+        Thread.sleep(5_000);
 
-        Thread.sleep(10_000);
-
-        ProductService.updateProduct(product);
-
-        List<Product> product1 = ProductService.getProductsByNameALike(product);
+        client.setName("Mariano");
+        ClientService.updateClient(client);
 
     }
 }

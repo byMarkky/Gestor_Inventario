@@ -2,7 +2,10 @@ package org.marco.dao.impl;
 
 import org.marco.dao.IClientDao;
 import org.marco.exceptions.CannotDeleteException;
+import org.marco.exceptions.DuplicateClientException;
 import org.marco.model.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -11,14 +14,48 @@ import java.util.List;
 
 public class ClientDaoJdbc implements IClientDao {
 
+    private static final Logger log = LoggerFactory.getLogger(ClientDaoJdbc.class);
     private final Connection connection;
 
     public ClientDaoJdbc(Connection conn) {
         this.connection = conn;
     }
 
+    private boolean exists(int id, String email) {
+        String query = "SELECT c.ID FROM CLIENT c WHERE c.ID=? OR c.EMAIL=?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, id);
+            statement.setString(2, email);
+
+            ResultSet res = statement.executeQuery();
+
+            return res.next();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private boolean haveSales(int clientId) {
+        String query = "SELECT s.SALES_ID FROM SALES s where s.CLIENT_ID=?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, clientId);
+
+            ResultSet res = statement.executeQuery();
+
+            return res.next();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public int insert(Client toCreate) {
+
+        if (exists(toCreate.getId(), toCreate.getEmail()))
+            throw new DuplicateClientException("CLIENT " + toCreate.getId() + " ALREADY EXISTS OR DUPLICATED EMAIL");
+
         int result;
         try {
             PreparedStatement statement = connection.prepareStatement(
@@ -46,18 +83,16 @@ public class ClientDaoJdbc implements IClientDao {
 
     @Override
     public boolean update(Client toModify) {
-        String query = "UPDATE CLIENT SET ID=?,NAME=?,SURNAME=?,EMAIL=?,PURCHASES=?,UPDATE_DATE=? WHERE ID=?";
+        String query = "UPDATE CLIENT SET NAME=?,SURNAME=?,PURCHASES=?,UPDATE_DATE=? WHERE ID=?";
         boolean res = false;
         try (PreparedStatement statement = connection.prepareStatement(query)) {
 
-            statement.setInt(1, toModify.getId());
-            statement.setString(2, toModify.getName());
-            statement.setString(3, toModify.getSurname());
-            statement.setString(4, toModify.getEmail());
-            statement.setInt(5, toModify.getPurchases());
-            statement.setObject(6, LocalDateTime.now());
+            statement.setString(1, toModify.getName());
+            statement.setString(2, toModify.getSurname());
+            statement.setInt(3, toModify.getPurchases());
+            statement.setObject(4, toModify.getUpdateDate());
 
-            statement.setInt(7, toModify.getId());  // WHERE ID = product.ID
+            statement.setInt(5, toModify.getId());  // WHERE ID = product.ID
 
             if (statement.executeUpdate() == 1) res = true;
 
@@ -70,6 +105,9 @@ public class ClientDaoJdbc implements IClientDao {
 
     @Override
     public boolean delete(int idToDelete) {
+
+        if (haveSales(idToDelete)) throw new CannotDeleteException("THIS CLIENT HAVE SALES: " + idToDelete);
+
         String query = "DELETE FROM CLIENT WHERE ID=?";
 
         try {

@@ -4,12 +4,16 @@ import org.marco.dao.ConnectionManager;
 import org.marco.dao.IClientDao;
 import org.marco.dao.impl.ClientDaoJdbc;
 import org.marco.model.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class ClientService {
     private static final IClientDao clientDao;
+    private static final Logger logger = LoggerFactory.getLogger(ClientService.class);
 
     static {
         try {
@@ -38,9 +42,15 @@ public class ClientService {
      * @return The new client data
      */
     public static Client updateClient(Client newInfo) {
-        if (clientDao.update(newInfo))
-            return newInfo;
 
+        newInfo.setUpdateDate(LocalDateTime.now());
+
+        if (clientDao.update(newInfo)) {
+            logger.info("CLIENT {} UPDATED", newInfo.getId());
+            return newInfo;
+        }
+
+        logger.info("CLIENT {} DO NOT UPDATED", newInfo.getId());
         return null;
     }
 

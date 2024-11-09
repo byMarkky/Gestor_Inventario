@@ -10,7 +10,7 @@ public class Client {
     private String email;
     private int purchases;
     private LocalDateTime createDate;
-    private LocalDateTime udpateDate;
+    private LocalDateTime updateDate;
 
     public Client(int id, String name, String surname, String email, int purchases, LocalDateTime createDate, LocalDateTime udpateDate) {
         this.id = id;
@@ -19,7 +19,7 @@ public class Client {
         this.email = email;
         this.purchases = purchases;
         this.createDate = createDate;
-        this.udpateDate = udpateDate;
+        this.updateDate = udpateDate;
     }
 
     public int getId() {
@@ -71,11 +71,11 @@ public class Client {
     }
 
     public LocalDateTime getUpdateDate() {
-        return udpateDate;
+        return updateDate;
     }
 
-    public void setUdpateDate(LocalDateTime udpateDate) {
-        this.udpateDate = udpateDate;
+    public void setUpdateDate(LocalDateTime updateDate) {
+        this.updateDate = updateDate;
     }
 
     @Override
@@ -87,7 +87,7 @@ public class Client {
                 ", email='" + email + '\'' +
                 ", purchases=" + purchases +
                 ", createDate=" + createDate +
-                ", udpateDate=" + udpateDate +
+                ", udpateDate=" + updateDate +
                 '}';
     }
 
@@ -96,11 +96,11 @@ public class Client {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Client client = (Client) o;
-        return id == client.id && purchases == client.purchases && Objects.equals(name, client.name) && Objects.equals(surname, client.surname) && Objects.equals(email, client.email) && Objects.equals(createDate, client.createDate) && Objects.equals(udpateDate, client.udpateDate);
+        return id == client.id && purchases == client.purchases && Objects.equals(name, client.name) && Objects.equals(surname, client.surname) && Objects.equals(email, client.email) && Objects.equals(createDate, client.createDate) && Objects.equals(updateDate, client.updateDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, surname, email, purchases, createDate, udpateDate);
+        return Objects.hash(id, name, surname, email, purchases, createDate, updateDate);
     }
 }
