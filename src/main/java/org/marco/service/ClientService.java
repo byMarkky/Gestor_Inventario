@@ -12,10 +12,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class ClientService {
-    private static final IClientDao clientDao;
+    private final IClientDao clientDao;
     private static final Logger logger = LoggerFactory.getLogger(ClientService.class);
 
-    static {
+    {
         try {
             clientDao = new ClientDaoJdbc(ConnectionManager.getInstance().getConnection());
         } catch (SQLException e) {
@@ -28,7 +28,7 @@ public class ClientService {
      * @param client Client to be created
      * @return The client created
      */
-    public static Client newClient(Client client) {
+    public Client newClient(Client client) {
 
         if (clientDao.insert(client) != 0)
             return client;
@@ -41,7 +41,7 @@ public class ClientService {
      * @param newInfo Update client info.
      * @return The new client data
      */
-    public static Client updateClient(Client newInfo) {
+    public Client updateClient(Client newInfo) {
 
         newInfo.setUpdateDate(LocalDateTime.now());
 
@@ -59,7 +59,7 @@ public class ClientService {
      * @param client Client to be deleted
      * @return True if the client has been successfully remove, else, false.
      */
-    public static boolean deleteClient(Client client) {
+    public boolean deleteClient(Client client) {
         return clientDao.delete(client.getId());
     }
 
@@ -67,7 +67,7 @@ public class ClientService {
      * Get all clients from the database
      * @return List of clients
      */
-    public static List<Client> getAllClients() {
+    public List<Client> getAllClients() {
         return clientDao.getAll();
     }
 
@@ -76,7 +76,7 @@ public class ClientService {
      * @param email Email of the client we want
      * @return The client with the specified email
      */
-    public static Client getClientByEmail(String email) {
+    public Client getClientByEmail(String email) {
         return clientDao.getByEmail(email);
     }
 

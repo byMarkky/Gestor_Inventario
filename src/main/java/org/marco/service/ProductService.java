@@ -3,7 +3,6 @@ package org.marco.service;
 import org.marco.dao.ConnectionManager;
 import org.marco.dao.IProductDao;
 import org.marco.dao.impl.ProductDaoJdbc;
-import org.marco.exceptions.CannotDeleteException;
 import org.marco.model.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProductService {
-    private static IProductDao productDAO;
+    private IProductDao productDAO;
     private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
-    public static Product newProduct(Product product) {
+    public Product newProduct(Product product) {
 
         try (Connection conn = ConnectionManager.getInstance().getConnection()) {
 
@@ -34,7 +33,7 @@ public class ProductService {
         return product;
     }
 
-    public static Product updateProduct(Product newInfo) {
+    public Product updateProduct(Product newInfo) {
 
         Product res = null;
 
@@ -57,7 +56,7 @@ public class ProductService {
         return res;
     }
 
-    public static boolean deleteProduct(Product prod) {
+    public boolean deleteProduct(Product prod) {
 
         boolean res;
         try (Connection conn = ConnectionManager.getInstance().getConnection()) {
@@ -78,7 +77,7 @@ public class ProductService {
         return res;
     }
 
-    public static Product getById(int productId) {
+    public Product getById(int productId) {
         Product res;
 
         try (Connection conn = ConnectionManager.getInstance().getConnection()) {
@@ -96,7 +95,7 @@ public class ProductService {
         return res;
     }
 
-    public static List<Product> getAllProduct() {
+    public List<Product> getAllProduct() {
 
         List<Product> result = new ArrayList<>();
 
@@ -110,7 +109,7 @@ public class ProductService {
         return result;
     }
 
-    public static List<Product> getProductsByNameALike(Product name) {
+    public List<Product> getProductsByNameALike(Product name) {
         List<Product> result = new ArrayList<>();
 
         try (Connection conn = ConnectionManager.getInstance().getConnection()) {

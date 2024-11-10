@@ -1,16 +1,21 @@
 package org.marco.dao.impl;
 
 import org.marco.dao.ISalesDao;
+import org.marco.exceptions.GeneralErrorException;
+import org.marco.exceptions.InventoryException;
 import org.marco.model.Client;
 import org.marco.model.Product;
 import org.marco.model.Sales;
 import org.marco.service.ProductService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.time.LocalDateTime;
 
 public class SalesDaoJdbc implements ISalesDao {
 
+    private static final Logger logger = LoggerFactory.getLogger(SalesDaoJdbc.class);
     private final Connection connection;
 
     public SalesDaoJdbc(Connection connection) {
@@ -35,11 +40,14 @@ public class SalesDaoJdbc implements ISalesDao {
             connection.commit();
 
             reduceStock(toCreate.getProduct());
+            logger.info("SALES {} CREATED", toCreate.getSalesId());
 
         } catch (SQLException e) {
             try {
+                logger.error("CALLBACK CREATING SALE {}", toCreate.getSalesId());
                 connection.rollback();
             } catch (SQLException ex) {
+                logger.error("UNABLE TO CREATE A SALE: {}", toCreate.getSalesId());
                 throw new RuntimeException(ex);
             }
             throw new RuntimeException(e);
@@ -47,6 +55,19 @@ public class SalesDaoJdbc implements ISalesDao {
     }
 
     private void reduceStock(Product product) {
+        int stock = 0;
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet res = statement.executeQuery("SELECT STOCK FROM PRODUCT WHERE ID=" + product.getId());
+            if (res.next()) {
+                stock = res.getInt("STOCK");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (stock - 1 < 0) throw new InventoryException("NEGATIVE STOCK AT PRODUCT " + product.getId());
+
         Product newProduct = new Product(
                 product.getId(),
                 product.getName(),
@@ -57,7 +78,8 @@ public class SalesDaoJdbc implements ISalesDao {
                 product.getCreateDate(),
                 product.getUpdateDate()
         );
-        ProductService.updateProduct(newProduct);
+        ProductService productService = new ProductService();
+        productService.updateProduct(newProduct);
     }
 
     @Override
@@ -68,10 +90,8 @@ public class SalesDaoJdbc implements ISalesDao {
 
         try (CallableStatement callableStatement = connection.prepareCall(procedureCall)) {
 
-            // Ejecutar el procedimiento
             ResultSet res = callableStatement.executeQuery();
 
-            // Procesar el resultado
             if (res.next()) {
                 product = new Product(
                         res.getInt("ID"),
@@ -85,11 +105,13 @@ public class SalesDaoJdbc implements ISalesDao {
                 );
 
             } else {
-                System.out.println("No se encontraron datos para el cliente con más compras.");
+                logger.error("CANT GET THE MOST PURCHASED PRODUCT");
+                throw new GeneralErrorException("Do not found data for the product");
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("ERROR GETTING MOST PURCHASED PRODUCT: {}", e.getMessage());
+            throw new GeneralErrorException("Error trying to get the most purchased product");
         }
         return product;
     }
@@ -118,11 +140,13 @@ public class SalesDaoJdbc implements ISalesDao {
                 );
 
             } else {
-                System.out.println("No se encontraron datos para el cliente con más compras.");
+                logger.error("CANT GET THE MOST PURCHASING CLIENT");
+                throw new GeneralErrorException("Do not found data for the client");
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("ERROR GETTING MOST PURCHASING CLIENT: {}", e.getMessage());
+            throw new GeneralErrorException("Error trying to get the most purchasing client");
         }
         return client;
     }

@@ -2,7 +2,6 @@ package org.marco;
 
 import org.marco.model.Client;
 import org.marco.model.Product;
-import org.marco.model.Sales;
 import org.marco.service.ClientService;
 import org.marco.service.ProductService;
 import org.marco.service.SalesService;
@@ -17,6 +16,10 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
 
+        ClientService clientService = new ClientService();
+        ProductService productService = new ProductService();
+        SalesService salesService = new SalesService();
+
         Client client = new Client(
                 2,
                 "Samuel",
@@ -27,32 +30,32 @@ public class Main {
                 LocalDateTime.now()
         );
 
-        ClientService.deleteClient(client);
+        clientService.deleteClient(client);
 
-        ClientService.newClient(client);
+        clientService.newClient(client);
 
         Thread.sleep(5_000);
 
         client.setName("Mariano");
-        ClientService.updateClient(client);
+        clientService.updateClient(client);
 
         Product product = new Product(
                 3,
                 "Logitech G29",
                 "Volante logitech",
-                20,
+                1,
                 300,
                 true,
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
 
-        ProductService.deleteProduct(product);
-        ProductService.newProduct(product);
+        productService.deleteProduct(product);
+        productService.newProduct(product);
 
-        SalesService.newSale(product, client, 1);
+        salesService.newSale(product, client, 1);
 
-        Client most = SalesService.getTopPurchasingClient();
+        Client most = salesService.getTopPurchasingClient();
 
         System.out.println(most);
 
