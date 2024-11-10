@@ -2,6 +2,7 @@ package org.marco;
 
 import org.marco.model.Client;
 import org.marco.model.Product;
+import org.marco.model.Sales;
 import org.marco.service.ClientService;
 import org.marco.service.ProductService;
 import org.marco.service.SalesService;
@@ -9,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class Main {
 
@@ -35,6 +35,26 @@ public class Main {
 
         client.setName("Mariano");
         ClientService.updateClient(client);
+
+        Product product = new Product(
+                3,
+                "Logitech G29",
+                "Volante logitech",
+                20,
+                300,
+                true,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+
+        ProductService.deleteProduct(product);
+        ProductService.newProduct(product);
+
+        SalesService.newSale(product, client, 1);
+
+        Client most = SalesService.getTopPurchasingClient();
+
+        System.out.println(most);
 
     }
 }

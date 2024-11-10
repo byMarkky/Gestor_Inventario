@@ -37,11 +37,11 @@ public class SalesService {
     }
 
     public static Product getMostPurchasedProduct() {
-        return null;
+        return salesDao.getMostPurchased();
     }
 
     public static Client getTopPurchasingClient() {
-        return null;
+        return salesDao.getTopPurchasingClient();
     }
 
 }
